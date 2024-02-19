@@ -27,5 +27,8 @@ class MovieFile:
         else:
             return "Desconocida"
 
+    def get_movie_filename(self):
+        return f"{self.get_filename()}{self.get_extension()}"
+
     def __str__(self):
-        return f"{self.get_filename()}{self.get_extension()} ({self.get_quality()})"
+        return f"{self.get_movie_filename()} ({self.get_quality()})"
