@@ -3,7 +3,7 @@ from sys import argv
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QMessageBox, QLabel
 from qtpy import uic
 
 from feature.movie_collector import MovieCollector
@@ -25,13 +25,14 @@ class RandomMoviePicker(QMainWindow):
         #
         self.movie_collector = MovieCollector()
         #
+        self.statusBar().addWidget(QLabel("Desarrollado por @JalexCode"))
         QMessageBox.warning(self,
                             "IMPORTANTE",
                             "LA ÚNICA REGLA PARA USAR ESTE PROGRAMA ES QUE:\nSEA CUAL SEA LA PELÍCULA SELECCIONADA, TIENES QUE VERLA\n¡¡¡ESTA REGLA NO SE PUEDE VIOLAR!!!\n(from me, to myself)")
 
     def load_config(self):
         saved_dirs = get_dirs()
-        self.movieFileLineEdit.toPlainText(saved_dirs)
+        self.movieListEditText.setPlainText(saved_dirs)
         #
         last_movie = get_last_movie()
         self.set_last_movie(last_movie)
@@ -43,7 +44,7 @@ class RandomMoviePicker(QMainWindow):
         dirs_text = self.movieListEditText.toPlainText().strip()
         dirs = dirs_text.split("\n")
         #
-        add_dirs_to_settings(dirs)
+        add_dirs_to_settings(dirs_text)
         #
         for dir in dirs:
             self.movie_collector.add_movie_dir(dir)
@@ -65,18 +66,19 @@ class RandomMoviePicker(QMainWindow):
         #
         add_last_movie_to_settings(movie.get_movie_filename())
         #
-        self.movieFileLineEdit.setText("Título:\n" + movie.get_movie_filename())
-        self.qualityLabel.setText("Calidad:\n" + movie.get_quality())
+        self.movieFileLineEdit.setText("Título:\n" + movie.get_filename())
+        self.qualityLabel.setText("Calidad de imagen:\n" + movie.get_quality())
         #
-        if image:
-            pixmap = QPixmap(image)
-            pixmap = pixmap.scaled(500, 500, QtCore.Qt.KeepAspectRatio)
+        if not image:
+            image = "res/no_image.jpeg"
+        pixmap = QPixmap(image)
+        pixmap = pixmap.scaled(500, 500, QtCore.Qt.KeepAspectRatio)
 
-            # Establecer la imagen en el QLabel
-            self.imageLabel.setPixmap(pixmap)
+        # Establecer la imagen en el QLabel
+        self.imageLabel.setPixmap(pixmap)
         #
-        self.openFileButton.clicked.connect(lambda: str(open_file_folder(movie.get_folder()) + movie.get_movie_filename()))
-        self.openFolderButton.clicked.connect(lambda: str(open_file_folder(movie.get_folder()) + movie.get_movie_filename()))
+        self.openFileButton.clicked.connect(lambda: open_file_folder(movie.fullpath))
+        self.openFolderButton.clicked.connect(lambda: open_file_folder(movie.fullpath, folder=True))
         #
         self.stackedWidget.setCurrentIndex(1)
         #
@@ -85,6 +87,7 @@ class RandomMoviePicker(QMainWindow):
     def set_last_movie(self, last_movie, save=False):
         if save: add_last_movie_to_settings(last_movie)
         self.lastMovieLabel.setText("Última selección: " + last_movie)
+
 def main():
     app = QApplication(argv)
     window = RandomMoviePicker()
