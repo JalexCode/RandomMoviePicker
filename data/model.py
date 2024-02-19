@@ -1,11 +1,14 @@
-from pathlib import Path
-
 from helper.util import *
 
 
 class MovieFile:
     def __init__(self, fullpath):
+        self.__fullpath_str = fullpath
         self.__fullpath = Path(fullpath)
+
+    @property
+    def fullpath (self):
+        return self.__fullpath_str
 
     def get_folder(self):
         return self.__fullpath.parent
